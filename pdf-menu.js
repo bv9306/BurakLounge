@@ -13,8 +13,13 @@ for(let i=0;i<recipes.length;i++){
 if(i%4===0){pdf.addPage();base(2+Math.floor(i/4))}
 const r=recipes[i],x=12+(i%2)*95,y=34+Math.floor((i%4)/2)*122;
 msg.textContent=` PDF hazırlanıyor: ${i+1}/${recipes.length}`;
-const img=await new Promise((resolve,reject)=>{let im=new Image();im.crossOrigin='anonymous';im.onload=()=>resolve(im);im.onerror=()=>reject(Error(r.n+' görseli yüklenemedi'));im.src=cocktailPhotos[r.n]});
+const src=cocktailPhotos[r.n];
+if(src){
+try{
+const img=await new Promise((resolve,reject)=>{let im=new Image();im.crossOrigin='anonymous';im.onload=()=>resolve(im);im.onerror=()=>reject(Error('görsel'));im.src=src});
 const c=document.createElement('canvas');c.width=c.height=640;let ctx=c.getContext('2d'),side=Math.min(img.naturalWidth,img.naturalHeight);ctx.drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,640,640);pdf.addImage(c.toDataURL('image/jpeg',.86),'JPEG',x+5,y,76,76);
+}catch(err){pdf.setFillColor(32,26,20);pdf.rect(x+5,y,76,76,'F')}
+}else{pdf.setFillColor(32,26,20);pdf.rect(x+5,y,76,76,'F');pdf.setFillColor(203,166,100);pdf.circle(x+43,y+34,16,'F')}
 text(r.n,x,y+83,10,gold);pdf.setFontSize(10);let lines=pdf.splitTextToSize(nicknames[r.n]?'“'+nicknames[r.n]+'”':'',86);text(lines,x,y+90,10);text(r.cat,x,y+109,7);const t=tasteProfile(r);text(`Tatlı ${t[0]} · Ekşi ${t[1]} · Bitter ${t[2]} · Gövde ${t[3]}`,x,y+115,6.5);
 await new Promise(resolve=>setTimeout(resolve,0));
 }
